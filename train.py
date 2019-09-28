@@ -255,16 +255,16 @@ if __name__ == "__main__":
 
     print("Frame columns", concat_data.columns)
 
-    train(concat_data, os.path.join(args.model_dir, "model.joblib"), args)
+    train(concat_data, os.path.join(args.model_dir, "model"), args)
 
 
 def model_fn(model_dir):
     """Deserialize fitted model
     """
-    nlp = spacy.load("en_pytt_xlnetbasecased_lg")
-    nlp.from_disk(os.path.join(model_dir, "model.joblib"))
+    nlp = spacy.load(os.path.join(model_dir, "model"))
 #     model = joblib.load(os.path.join(model_dir, "model.joblib"))
 #     print("[model_fn] - Celebrities data", model["celebrities"].head(3))
+    print("[model_fn] pipelines", nlp.pipeline)
     print("[model_fn] ",nlp)
     return nlp
 
@@ -303,9 +303,13 @@ def predict_fn(input_data, model):
     """
     print("[predict_fn] Input Type: ", type(input_data))
     print("[predict_fn] Input: ", input_data)
+    results = []
+    for data in input_data:
+        nlp = model(data[TEXT_COL])
+        print("[predict_fn] cats: ", nlp.cats)
+        results.append(nlp.cats)
     print("[predict_fn] Model: ", model)
-    nlp = model(input_data)
-    return nlp.cats
+    return results
 
 
 def output_fn(prediction, accept):
